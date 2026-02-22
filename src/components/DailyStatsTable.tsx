@@ -1,4 +1,4 @@
-import { DailyStats } from '@/lib/types'
+import type { DailyStats } from '@/lib/types'
 import { formatUSD, formatDateFull } from '@/lib/format'
 
 interface Props {
