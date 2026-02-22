@@ -16,6 +16,7 @@ import { VolumeChart } from '@/components/VolumeChart'
 import { NetFlowChart } from '@/components/NetFlowChart'
 import { WalletAvgChart } from '@/components/WalletAvgChart'
 import { ErrorState } from '@/components/ErrorState'
+import { DailyStatsTable } from '@/components/DailyStatsTable'
 
 const queryClient = new QueryClient()
 
@@ -192,6 +193,13 @@ function Dashboard() {
             </div>
           </div>
         ) : null}
+
+        {/* Daily Stats Table */}
+        {!isLoading && data && (
+          <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <DailyStatsTable data={data} />
+          </div>
+        )}
 
         {/* Footer */}
         <footer className="border-t border-gray-800 pt-4 pb-8">
