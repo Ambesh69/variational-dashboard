@@ -9,19 +9,50 @@ function getApiKey(): string {
   return key
 }
 
+/** Fetch the latest cached results (fast, used on initial load) */
 export async function getQueryResults(): Promise<DuneApiResponse> {
   const res = await fetch(`${DUNE_API_BASE}/query/${QUERY_ID}/results?limit=500`, {
-    headers: {
-      'X-DUNE-API-KEY': getApiKey(),
-    },
+    headers: { 'X-DUNE-API-KEY': getApiKey() },
   })
-
   if (!res.ok) {
     const text = await res.text()
     throw new Error(`Dune API error (${res.status}): ${text}`)
   }
-
   return res.json()
+}
+
+/** Trigger a fresh query execution, then poll until complete and return results */
+export async function executeAndGetResults(): Promise<DuneApiResponse> {
+  const key = getApiKey()
+
+  // 1. Kick off execution
+  const execRes = await fetch(`${DUNE_API_BASE}/query/${QUERY_ID}/execute`, {
+    method: 'POST',
+    headers: { 'X-DUNE-API-KEY': key, 'Content-Type': 'application/json' },
+  })
+  if (!execRes.ok) {
+    const text = await execRes.text()
+    throw new Error(`Dune execute error (${execRes.status}): ${text}`)
+  }
+  const { execution_id } = await execRes.json()
+
+  // 2. Poll until finished (max ~60s)
+  for (let i = 0; i < 30; i++) {
+    await new Promise((r) => setTimeout(r, 2000))
+
+    const res = await fetch(
+      `${DUNE_API_BASE}/execution/${execution_id}/results?limit=500`,
+      { headers: { 'X-DUNE-API-KEY': key } },
+    )
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`Dune results error (${res.status}): ${text}`)
+    }
+    const data: DuneApiResponse = await res.json()
+    if (data.is_execution_finished) return data
+  }
+
+  throw new Error('Query execution timed out after 60s')
 }
 
 export function transformRows(rows: DuneRow[]): DailyStats[] {
