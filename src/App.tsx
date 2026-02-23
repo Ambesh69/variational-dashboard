@@ -21,7 +21,7 @@ import { DailyStatsTable } from '@/components/DailyStatsTable'
 const queryClient = new QueryClient()
 
 function Dashboard() {
-  const { data, isLoading, error, refetch, dataUpdatedAt } = useDuneQuery()
+  const { data, isLoading, error, dataUpdatedAt, isRefreshing, forceRefresh } = useDuneQuery()
 
   const latest = data?.[0]
 
@@ -36,7 +36,7 @@ function Dashboard() {
     return (
       <ErrorState
         message={error instanceof Error ? error.message : 'Failed to load data from Dune Analytics'}
-        onRetry={() => refetch()}
+        onRetry={() => forceRefresh()}
       />
     )
   }
@@ -64,11 +64,12 @@ function Dashboard() {
               </span>
             )}
             <button
-              onClick={() => refetch()}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-gray-100 transition-colors text-sm cursor-pointer"
+              onClick={() => forceRefresh()}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Refresh</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{isRefreshing ? 'Refreshing…' : 'Refresh'}</span>
             </button>
           </div>
         </div>
