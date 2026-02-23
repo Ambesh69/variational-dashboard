@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   ArrowDownToLine,
@@ -7,6 +8,8 @@ import {
   Wallet,
   BarChart3,
   RefreshCw,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { useDuneQuery } from '@/hooks/useDuneQuery'
 import { formatUSD } from '@/lib/format'
@@ -22,6 +25,21 @@ const queryClient = new QueryClient()
 
 function Dashboard() {
   const { data, isLoading, error, dataUpdatedAt, isRefreshing, forceRefresh } = useDuneQuery()
+
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    const stored = localStorage.getItem('theme')
+    return stored ? stored === 'dark' : true
+  })
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (isDark) {
+      root.removeAttribute('data-theme')
+    } else {
+      root.setAttribute('data-theme', 'light')
+    }
+    localStorage.setItem('theme', isDark ? 'dark' : 'light')
+  }, [isDark])
 
   const latest = data?.[0]
 
@@ -42,56 +60,120 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <BarChart3 className="w-5 h-5 text-blue-400" />
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-base)' }}>
+
+      {/* ── Header ── */}
+      <header
+        className="sticky top-0 z-10"
+        style={{
+          backgroundColor: 'var(--nav-blur-bg)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid var(--border-default)',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+
+          {/* Logo + title */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0"
+              style={{ backgroundColor: 'var(--accent-blue-bg)', border: '1px solid var(--border-default)' }}
+            >
+              <BarChart3 className="w-4 h-4" style={{ color: 'var(--accent-blue)' }} />
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-50 tracking-tight">
-                Variational Protocol
-              </h1>
-              <p className="text-xs text-gray-500">USDC Flow Analytics — Arbitrum</p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1
+                  className="text-sm font-semibold tracking-tight whitespace-nowrap"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  Variational Protocol
+                </h1>
+                <span
+                  className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md tracking-wider uppercase"
+                  style={{
+                    backgroundColor: 'var(--accent-blue-bg)',
+                    color: 'var(--accent-blue)',
+                    border: '1px solid var(--accent-blue-bg)',
+                  }}
+                >
+                  Arbitrum
+                </span>
+              </div>
+              <p className="text-[11px] leading-none mt-0.5 hidden sm:block" style={{ color: 'var(--text-muted)' }}>
+                USDC Flow Analytics
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Right controls */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {lastUpdated && (
-              <span className="text-xs text-gray-500 hidden sm:block">
+              <span className="text-[11px] hidden md:block" style={{ color: 'var(--text-muted)' }}>
                 Updated {lastUpdated}
               </span>
             )}
+
+            {/* Divider */}
+            <div className="hidden md:block w-px h-4" style={{ backgroundColor: 'var(--border-default)' }} />
+
+            {/* Refresh */}
             <button
               onClick={() => forceRefresh()}
               disabled={isRefreshing}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              style={{
+                backgroundColor: 'var(--bg-input)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-default)',
+              }}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 flex-shrink-0 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">{isRefreshing ? 'Refreshing…' : 'Refresh'}</span>
+            </button>
+
+            {/* Theme toggle */}
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className="flex items-center justify-center w-8 h-8 rounded-lg cursor-pointer"
+              style={{
+                backgroundColor: 'var(--bg-input)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-default)',
+              }}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDark
+                ? <Sun className="w-3.5 h-3.5" />
+                : <Moon className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* KPI Row 1: Monthly totals + 30d averages */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── Main content ── */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+
+        {/* Section label */}
+        <div className="flex items-center gap-2 pt-1 pb-0.5">
+          <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+            Key Metrics
+          </span>
+          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-default)' }} />
+        </div>
+
+        {/* KPI Row 1 */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {isLoading ? (
-            <>
-              <KpiSkeleton />
-              <KpiSkeleton />
-              <KpiSkeleton />
-              <KpiSkeleton />
-            </>
+            <><KpiSkeleton /><KpiSkeleton /><KpiSkeleton /><KpiSkeleton /></>
           ) : (
             <>
               <div className="animate-fade-in stagger-1">
                 <KpiCard
                   label="Monthly Deposits"
                   value={formatUSD(latest?.monthlyTotalDeposits ?? 0)}
-                  icon={<ArrowDownToLine className="w-4 h-4" />}
+                  icon={<ArrowDownToLine className="w-3.5 h-3.5" />}
                   accentColor="emerald"
                   subtitle="Current month total"
                 />
@@ -100,7 +182,7 @@ function Dashboard() {
                 <KpiCard
                   label="Monthly Withdrawals"
                   value={formatUSD(latest?.monthlyTotalWithdrawals ?? 0)}
-                  icon={<ArrowUpFromLine className="w-4 h-4" />}
+                  icon={<ArrowUpFromLine className="w-3.5 h-3.5" />}
                   accentColor="red"
                   subtitle="Current month total"
                 />
@@ -109,7 +191,7 @@ function Dashboard() {
                 <KpiCard
                   label="Avg Daily Deposit"
                   value={formatUSD(latest?.avgDepositPerDay30d ?? 0)}
-                  icon={<TrendingUp className="w-4 h-4" />}
+                  icon={<TrendingUp className="w-3.5 h-3.5" />}
                   accentColor="blue"
                   subtitle="30-day rolling average"
                 />
@@ -118,7 +200,7 @@ function Dashboard() {
                 <KpiCard
                   label="Avg Daily Withdrawal"
                   value={formatUSD(latest?.avgWithdrawalPerDay30d ?? 0)}
-                  icon={<Activity className="w-4 h-4" />}
+                  icon={<Activity className="w-3.5 h-3.5" />}
                   accentColor="amber"
                   subtitle="30-day rolling average"
                 />
@@ -127,22 +209,17 @@ function Dashboard() {
           )}
         </div>
 
-        {/* KPI Row 2: 24h volumes + wallet avgs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI Row 2 */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {isLoading ? (
-            <>
-              <KpiSkeleton />
-              <KpiSkeleton />
-              <KpiSkeleton />
-              <KpiSkeleton />
-            </>
+            <><KpiSkeleton /><KpiSkeleton /><KpiSkeleton /><KpiSkeleton /></>
           ) : (
             <>
               <div className="animate-fade-in stagger-5">
                 <KpiCard
                   label="24h Deposit Volume"
                   value={formatUSD(latest?.dailyDepositVol ?? 0)}
-                  icon={<ArrowDownToLine className="w-4 h-4" />}
+                  icon={<ArrowDownToLine className="w-3.5 h-3.5" />}
                   accentColor="emerald"
                   trend={(latest?.dailyDepositVol ?? 0) > (latest?.avgDepositPerDay30d ?? 0) ? 'up' : 'down'}
                   subtitle="vs 30d avg"
@@ -152,7 +229,7 @@ function Dashboard() {
                 <KpiCard
                   label="24h Withdrawal Volume"
                   value={formatUSD(latest?.dailyWithdrawalVol ?? 0)}
-                  icon={<ArrowUpFromLine className="w-4 h-4" />}
+                  icon={<ArrowUpFromLine className="w-3.5 h-3.5" />}
                   accentColor="red"
                   trend={(latest?.dailyWithdrawalVol ?? 0) > (latest?.avgWithdrawalPerDay30d ?? 0) ? 'up' : 'down'}
                   subtitle="vs 30d avg"
@@ -162,7 +239,7 @@ function Dashboard() {
                 <KpiCard
                   label="Avg Deposit / Wallet / Day"
                   value={formatUSD(latest?.avgDepositSizePerWallet ?? 0)}
-                  icon={<Wallet className="w-4 h-4" />}
+                  icon={<Wallet className="w-3.5 h-3.5" />}
                   accentColor="amber"
                   subtitle="Per unique depositor today"
                 />
@@ -171,7 +248,7 @@ function Dashboard() {
                 <KpiCard
                   label="Avg Withdrawal / Wallet / Day"
                   value={formatUSD(latest?.avgWithdrawalSizePerWallet ?? 0)}
-                  icon={<Wallet className="w-4 h-4" />}
+                  icon={<Wallet className="w-3.5 h-3.5" />}
                   accentColor="red"
                   subtitle="Per unique withdrawer today"
                 />
@@ -180,30 +257,48 @@ function Dashboard() {
           )}
         </div>
 
+        {/* Section label */}
+        <div className="flex items-center gap-2 pt-2 pb-0.5">
+          <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+            Charts
+          </span>
+          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-default)' }} />
+        </div>
+
         {/* Charts */}
         {isLoading ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <ChartSkeleton />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <ChartSkeleton />
               <ChartSkeleton />
             </div>
           </div>
         ) : data ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <VolumeChart data={data} />
+              <VolumeChart data={data} isDark={isDark} />
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                <NetFlowChart data={data} />
+                <NetFlowChart data={data} isDark={isDark} />
               </div>
               <div className="animate-fade-in" style={{ animationDelay: '0.45s' }}>
-                <WalletAvgChart data={data} />
+                <WalletAvgChart data={data} isDark={isDark} />
               </div>
             </div>
           </div>
         ) : null}
+
+        {/* Section label */}
+        {!isLoading && data && (
+          <div className="flex items-center gap-2 pt-2 pb-0.5">
+            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+              Historical Data
+            </span>
+            <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border-default)' }} />
+          </div>
+        )}
 
         {/* Daily Stats Table */}
         {!isLoading && data && (
@@ -213,13 +308,11 @@ function Dashboard() {
         )}
 
         {/* Footer */}
-        <footer className="border-t border-gray-800 pt-4 pb-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-600">
-            <span>
-              Data source: Dune Analytics (Query #6724387)
-            </span>
-            <span>
-              Contracts: Factory 0x84BE...6172 &middot; OLP Vault 0x74bb...f2cd
+        <footer className="pt-6 pb-8" style={{ borderTop: '1px solid var(--border-default)' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+            <span>Data source: Dune Analytics · Query #6724387</span>
+            <span className="font-mono text-[10px]">
+              Factory 0x84BE…6172 · OLP Vault 0x74bb…f2cd
             </span>
           </div>
         </footer>

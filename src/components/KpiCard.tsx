@@ -10,18 +10,11 @@ interface KpiCardProps {
   accentColor?: 'emerald' | 'red' | 'blue' | 'amber'
 }
 
-const accentStyles = {
-  emerald: 'text-emerald-400',
-  red: 'text-red-400',
-  blue: 'text-blue-400',
-  amber: 'text-amber-400',
-} as const
-
-const iconBgStyles = {
-  emerald: 'bg-emerald-500/10',
-  red: 'bg-red-500/10',
-  blue: 'bg-blue-500/10',
-  amber: 'bg-amber-500/10',
+const accentVars = {
+  emerald: { color: 'var(--accent-emerald)', bg: 'var(--accent-emerald-bg)' },
+  red:     { color: 'var(--accent-red)',     bg: 'var(--accent-red-bg)'     },
+  blue:    { color: 'var(--accent-blue)',    bg: 'var(--accent-blue-bg)'    },
+  amber:   { color: 'var(--accent-amber)',   bg: 'var(--accent-amber-bg)'   },
 } as const
 
 export function KpiCard({
@@ -32,26 +25,61 @@ export function KpiCard({
   subtitle,
   accentColor = 'emerald',
 }: KpiCardProps) {
+  const accent = accentVars[accentColor]
+
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 p-5 flex flex-col gap-3 hover:border-gray-700 transition-colors">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-400">{label}</span>
-        <div className={`p-2 rounded-lg ${iconBgStyles[accentColor]}`}>
-          <span className={accentStyles[accentColor]}>{icon}</span>
+    <div
+      className="rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden"
+      style={{
+        backgroundColor: 'var(--bg-surface)',
+        border: '1px solid var(--border-default)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+    >
+      {/* Colored left-edge accent bar */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl"
+        style={{ backgroundColor: accent.color, opacity: 0.7 }}
+      />
+
+      {/* Top row: label + icon */}
+      <div className="flex items-start justify-between gap-2 pl-2">
+        <span
+          className="text-xs font-medium leading-tight"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          {label}
+        </span>
+        <div
+          className="flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0"
+          style={{ backgroundColor: accent.bg }}
+        >
+          <span style={{ color: accent.color }}>{icon}</span>
         </div>
       </div>
-      <div className="flex items-end gap-2">
-        <span className="text-2xl font-bold text-gray-50 tracking-tight">{value}</span>
+
+      {/* Value */}
+      <div className="flex items-end gap-1.5 pl-2">
+        <span
+          className="font-data text-2xl font-medium leading-none tracking-tight"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {value}
+        </span>
         {trend && (
-          <span className="mb-1">
-            {trend === 'up' && <TrendingUp className="w-4 h-4 text-emerald-400" />}
-            {trend === 'down' && <TrendingDown className="w-4 h-4 text-red-400" />}
-            {trend === 'neutral' && <Minus className="w-4 h-4 text-gray-500" />}
+          <span className="mb-0.5">
+            {trend === 'up'      && <TrendingUp   className="w-4 h-4" style={{ color: 'var(--accent-emerald)' }} />}
+            {trend === 'down'    && <TrendingDown  className="w-4 h-4" style={{ color: 'var(--accent-red)'     }} />}
+            {trend === 'neutral' && <Minus         className="w-4 h-4" style={{ color: 'var(--text-muted)'     }} />}
           </span>
         )}
       </div>
+
+      {/* Subtitle */}
       {subtitle && (
-        <span className="text-xs text-gray-500">{subtitle}</span>
+        <span className="text-[11px] leading-none pl-2" style={{ color: 'var(--text-muted)' }}>
+          {subtitle}
+        </span>
       )}
     </div>
   )

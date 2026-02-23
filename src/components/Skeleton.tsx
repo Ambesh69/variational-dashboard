@@ -5,26 +5,43 @@ interface SkeletonProps {
 export function Skeleton({ className = '' }: SkeletonProps) {
   return (
     <div
-      className={`rounded-lg bg-gray-800 skeleton-pulse ${className}`}
+      className={`rounded-lg skeleton-pulse ${className}`}
+      style={{ backgroundColor: 'var(--skeleton-bg)' }}
     />
   )
 }
 
 export function KpiSkeleton() {
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
-      <Skeleton className="h-4 w-24 mb-3" />
-      <Skeleton className="h-8 w-32 mb-2" />
-      <Skeleton className="h-3 w-20" />
+    <div
+      className="rounded-xl p-4 flex flex-col gap-3"
+      style={{
+        backgroundColor: 'var(--bg-surface)',
+        border: '1px solid var(--border-default)',
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-7 w-7 rounded-lg" />
+      </div>
+      <Skeleton className="h-7 w-28" />
+      <Skeleton className="h-2.5 w-16" />
     </div>
   )
 }
 
 export function ChartSkeleton() {
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 p-5">
-      <Skeleton className="h-5 w-48 mb-4" />
-      <Skeleton className="h-64 w-full" />
+    <div
+      className="rounded-xl p-5"
+      style={{
+        backgroundColor: 'var(--bg-surface)',
+        border: '1px solid var(--border-default)',
+      }}
+    >
+      <Skeleton className="h-4 w-44 mb-1" />
+      <Skeleton className="h-3 w-32 mb-5" />
+      <Skeleton className="h-64 w-full rounded-lg" />
     </div>
   )
 }
