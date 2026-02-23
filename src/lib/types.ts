@@ -7,6 +7,7 @@ export interface DuneRow {
   avg_deposit_per_day_30d: number | null
   avg_withdrawal_per_day_30d: number | null
   avg_deposit_size_per_wallet: number | null
+  avg_withdrawal_size_per_wallet: number | null
 }
 
 export interface DailyStats {
@@ -18,6 +19,7 @@ export interface DailyStats {
   avgDepositPerDay30d: number
   avgWithdrawalPerDay30d: number
   avgDepositSizePerWallet: number
+  avgWithdrawalSizePerWallet: number
   netFlow: number
 }
 

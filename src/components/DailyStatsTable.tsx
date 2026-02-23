@@ -42,7 +42,8 @@ export function DailyStatsTable({ data }: Props) {
               <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Mo. Withdrawals</th>
               <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Avg Dep/Day (30d)</th>
               <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Avg Wdw/Day (30d)</th>
-              <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Avg/Wallet</th>
+              <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Avg Dep/Wallet</th>
+              <th className="text-right px-4 py-3 text-gray-500 font-medium whitespace-nowrap">Avg Wdw/Wallet</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800/60">
@@ -74,6 +75,9 @@ export function DailyStatsTable({ data }: Props) {
                 </td>
                 <td className="px-4 py-2.5 text-right text-gray-300 whitespace-nowrap">
                   {formatUSD(row.avgDepositSizePerWallet)}
+                </td>
+                <td className="px-4 py-2.5 text-right text-gray-300 whitespace-nowrap">
+                  {formatUSD(row.avgWithdrawalSizePerWallet)}
                 </td>
               </tr>
             ))}
