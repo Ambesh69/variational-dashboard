@@ -127,10 +127,11 @@ function Dashboard() {
           )}
         </div>
 
-        {/* KPI Row 2: 24h volumes + wallet avg */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* KPI Row 2: 24h volumes + wallet avgs */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {isLoading ? (
             <>
+              <KpiSkeleton />
               <KpiSkeleton />
               <KpiSkeleton />
               <KpiSkeleton />
@@ -157,13 +158,22 @@ function Dashboard() {
                   subtitle="vs 30d avg"
                 />
               </div>
-              <div className="animate-fade-in stagger-7 col-span-2 lg:col-span-1">
+              <div className="animate-fade-in stagger-7">
                 <KpiCard
                   label="Avg Deposit / Wallet / Day"
                   value={formatUSD(latest?.avgDepositSizePerWallet ?? 0)}
                   icon={<Wallet className="w-4 h-4" />}
                   accentColor="amber"
                   subtitle="Per unique depositor today"
+                />
+              </div>
+              <div className="animate-fade-in stagger-8">
+                <KpiCard
+                  label="Avg Withdrawal / Wallet / Day"
+                  value={formatUSD(latest?.avgWithdrawalSizePerWallet ?? 0)}
+                  icon={<Wallet className="w-4 h-4" />}
+                  accentColor="red"
+                  subtitle="Per unique withdrawer today"
                 />
               </div>
             </>

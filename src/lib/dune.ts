@@ -65,6 +65,7 @@ export function transformRows(rows: DuneRow[]): DailyStats[] {
     avgDepositPerDay30d: row.avg_deposit_per_day_30d ?? 0,
     avgWithdrawalPerDay30d: row.avg_withdrawal_per_day_30d ?? 0,
     avgDepositSizePerWallet: row.avg_deposit_size_per_wallet ?? 0,
+    avgWithdrawalSizePerWallet: row.avg_withdrawal_size_per_wallet ?? 0,
     netFlow: (row.daily_deposit_volume_24h ?? 0) - (row.daily_withdrawal_volume_24h ?? 0),
   }))
 }
