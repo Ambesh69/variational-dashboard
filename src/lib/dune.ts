@@ -1,7 +1,7 @@
 import type { DuneApiResponse, DuneRow, DailyStats } from './types'
 
 const DUNE_API_BASE = 'https://api.dune.com/api/v1'
-const QUERY_ID = 6724387
+const QUERY_ID = 6742853
 
 function getApiKey(): string {
   const key = import.meta.env.VITE_DUNE_API_KEY
