@@ -1,38 +1,28 @@
 import type { DuneApiResponse, DuneRow, DailyStats } from './types'
 
-const DUNE_API_BASE = 'https://api.dune.com/api/v1'
-const QUERY_ID = 6742853
-
-function getApiKey(): string {
-  const key = import.meta.env.VITE_DUNE_API_KEY
-  if (!key) throw new Error('VITE_DUNE_API_KEY is not set')
-  return key
+function apiError(status: number, detail: string): Error {
+  if (status === 402) return new Error('Dune has reached its configured usage limit. The dashboard owner must resolve the limit in Dune before refreshing data.')
+  if (status === 404 && detail.includes('No execution found')) return new Error('Dune has no saved results for this query. Choose Try again to request a fresh run. If the Dune usage limit is reached, the owner must resolve it first.')
+  return new Error(`Dune request failed (${status}): ${detail}`)
 }
 
-/** Fetch the latest cached results (fast, used on initial load) */
+/** Fetch the latest cached results via our server-side proxy */
 export async function getQueryResults(): Promise<DuneApiResponse> {
-  const res = await fetch(`${DUNE_API_BASE}/query/${QUERY_ID}/results?limit=500`, {
-    headers: { 'X-DUNE-API-KEY': getApiKey() },
-  })
+  const res = await fetch('/api/dune?action=results')
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(`Dune API error (${res.status}): ${text}`)
+    throw apiError(res.status, text)
   }
   return res.json()
 }
 
 /** Trigger a fresh query execution, then poll until complete and return results */
 export async function executeAndGetResults(): Promise<DuneApiResponse> {
-  const key = getApiKey()
-
   // 1. Kick off execution
-  const execRes = await fetch(`${DUNE_API_BASE}/query/${QUERY_ID}/execute`, {
-    method: 'POST',
-    headers: { 'X-DUNE-API-KEY': key, 'Content-Type': 'application/json' },
-  })
+  const execRes = await fetch('/api/dune?action=execute', { method: 'POST' })
   if (!execRes.ok) {
     const text = await execRes.text()
-    throw new Error(`Dune execute error (${execRes.status}): ${text}`)
+    throw apiError(execRes.status, text)
   }
   const { execution_id } = await execRes.json()
 
@@ -40,16 +30,18 @@ export async function executeAndGetResults(): Promise<DuneApiResponse> {
   for (let i = 0; i < 30; i++) {
     await new Promise((r) => setTimeout(r, 2000))
 
-    const res = await fetch(
-      `${DUNE_API_BASE}/execution/${execution_id}/results?limit=500`,
-      { headers: { 'X-DUNE-API-KEY': key } },
-    )
+    const res = await fetch(`/api/dune?action=execution_results&execution_id=${execution_id}`)
     if (!res.ok) {
       const text = await res.text()
-      throw new Error(`Dune results error (${res.status}): ${text}`)
+      throw apiError(res.status, text)
     }
     const data: DuneApiResponse = await res.json()
-    if (data.is_execution_finished) return data
+    if (data.is_execution_finished) {
+      if (data.state !== 'QUERY_STATE_COMPLETED' || !data.result) {
+        throw new Error(`Dune query did not complete successfully (${data.state}). Check its execution in Dune.`)
+      }
+      return data
+    }
   }
 
   throw new Error('Query execution timed out after 60s')

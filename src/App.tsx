@@ -310,7 +310,7 @@ function Dashboard() {
         {/* Footer */}
         <footer className="pt-6 pb-8" style={{ borderTop: '1px solid var(--border-default)' }}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]" style={{ color: 'var(--text-muted)' }}>
-            <span>Data source: Dune Analytics · Query #6724387</span>
+            <span>Data source: Dune Analytics · Query #6742853</span>
             <span className="font-mono text-[10px]">
               Factory 0x84BE…6172 · OLP Vault 0x74bb…f2cd
             </span>
